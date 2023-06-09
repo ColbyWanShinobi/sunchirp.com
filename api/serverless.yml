@@ -1,0 +1,14 @@
+service: sunchirp-api
+frameworkVersion: '2 || 3'
+
+provider:
+  name: aws
+  runtime: nodejs18.x
+
+functions:
+  hello:
+    handler: src/handlers/handler.hello
+    events:
+      - httpApi:
+          path: /hello
+          method: get
