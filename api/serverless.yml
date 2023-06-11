@@ -1,5 +1,6 @@
 service: sunchirp-api
 frameworkVersion: '2 || 3'
+useDotenv: true
 
 plugins:
   - serverless-s3-sync
@@ -86,13 +87,31 @@ resources:
                 Forward: none
             TargetOriginId: S3Origin
             ViewerProtocolPolicy: redirect-to-https
-          Comment: my example website in s3
+          Comment: sunchirp.com configuration
           DefaultRootObject: index.html
           Enabled: true
           HttpVersion: http2
           PriceClass: PriceClass_All
           ViewerCertificate:
-            CloudFrontDefaultCertificate: true
+            AcmCertificateArn: ${env:CERT_ARN}
+            MinimumProtocolVersion: TLSv1.1_2016
+            SslSupportMethod: sni-only
+          Aliases:
+            - sunchirp.com
+
+    FrontPageDNSName:
+          Type: AWS::Route53::RecordSetGroup
+          Properties:
+            HostedZoneName: sunchirp.com.
+            RecordSets:
+              - Name: sunchirp.com
+                Type: A
+                AliasTarget:
+                  HostedZoneId: Z2FDTNDATAQYW2 #Default CloudFront Zone ID
+                  DNSName:
+                    Fn::GetAtt:
+                      - FrontPageCloudFront
+                      - DomainName
 
 custom:
   siteName: sunchirp.com
