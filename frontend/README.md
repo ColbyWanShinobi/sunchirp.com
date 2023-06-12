@@ -1,2 +1,0 @@
-# sunchirp.com
-☀🐦
