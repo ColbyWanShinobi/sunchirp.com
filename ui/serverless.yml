@@ -1,0 +1,114 @@
+service: sunchirp-api
+frameworkVersion: '2 || 3'
+useDotenv: true
+
+plugins:
+  - serverless-s3-sync
+
+provider:
+  name: aws
+  runtime: nodejs18.x
+  memorySize: 256
+  stage: ${opt:stage, 'prod'}
+  region: us-east-1
+
+resources:
+  Resources:
+    SunchirpWebsiteBucket:
+      Type: AWS::S3::Bucket
+      Properties:
+        BucketName: ${self:custom.siteName}
+    SunchirpWebsiteBucketPolicy:
+      Type: AWS::S3::BucketPolicy
+      Properties:
+        Bucket: !Ref SunchirpWebsiteBucket
+        PolicyDocument:
+          Statement:
+            - Effect: Allow
+              Action:
+                - s3:GetObject
+              Resource: 
+                Fn::Join:
+                  - /
+                  - - Fn::GetAtt:
+                        - SunchirpWebsiteBucket
+                        - Arn
+                    - '*'
+              Principal:
+                CanonicalUser: 
+                  Fn::GetAtt: 
+                    - SunchirpWebsiteOriginAccessIdentity
+                    - S3CanonicalUserId
+    SunchirpWebsiteOriginAccessIdentity:
+      Type: AWS::CloudFront::CloudFrontOriginAccessIdentity
+      Properties:
+        CloudFrontOriginAccessIdentityConfig:
+          Comment: Origin Access Identity to Access Website Bucket
+    SunchirpCloudFront:
+      Type: AWS::CloudFront::Distribution
+      DependsOn:
+        - SunchirpWebsiteBucket
+      Properties:
+        DistributionConfig: 
+          Origins:
+            - DomainName: 
+                Fn::GetAtt: 
+                  - SunchirpWebsiteBucket
+                  - RegionalDomainName
+              Id: S3Origin
+              S3OriginConfig:
+                OriginAccessIdentity: 
+                  Fn::Join: 
+                    - /
+                    - - origin-access-identity
+                      - cloudfront
+                      - !Ref SunchirpWebsiteOriginAccessIdentity
+          CustomErrorResponses:
+            - ErrorCachingMinTTL: 0
+              ErrorCode: 403
+              ResponseCode: 200
+              ResponsePagePath: /index.html
+          DefaultCacheBehavior:
+            AllowedMethods:
+              - GET
+              - HEAD
+            Compress: true
+            ForwardedValues:
+              QueryString: true
+              Cookies:
+                Forward: none
+            TargetOriginId: S3Origin
+            ViewerProtocolPolicy: redirect-to-https
+          Comment: Website Configuration
+          DefaultRootObject: index.html
+          Enabled: true
+          HttpVersion: http2
+          PriceClass: PriceClass_All
+          ViewerCertificate:
+            AcmCertificateArn: ${env:CERT_ARN}
+            MinimumProtocolVersion: TLSv1.1_2016
+            SslSupportMethod: sni-only
+          Aliases:
+            - ${self:custom.siteName}
+
+    SunchirpDNSName:
+          Type: AWS::Route53::RecordSetGroup
+          Properties:
+            HostedZoneName: ${self:custom.siteName}.
+            RecordSets:
+              - Name: ${self:custom.siteName}
+                Type: A
+                AliasTarget:
+                  HostedZoneId: Z2FDTNDATAQYW2 #Default CloudFront Zone ID
+                  DNSName:
+                    Fn::GetAtt:
+                      - SunchirpCloudFront
+                      - DomainName
+
+custom:
+  siteName: sunchirp.com
+  
+  s3Sync:
+    - bucketName: ${self:custom.siteName}
+      localDir: dist
+  
