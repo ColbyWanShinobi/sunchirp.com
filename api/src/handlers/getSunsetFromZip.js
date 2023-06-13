@@ -1,8 +1,9 @@
 "use strict";
 
-let convert = require('convert-zip-to-gps');
+const convert = require('convert-zip-to-gps');
+const SolarCalc = require('solar-calc');
 
-module.exports.handler = async function getGpsFromZip(event, context) {
+module.exports.handler = async function getSunsetFromZip(event, context) {
   const { zipCode }  =  event.pathParameters;
   let statusCode;
   try {
@@ -19,14 +20,16 @@ module.exports.handler = async function getGpsFromZip(event, context) {
         )
       };
     }
+
+    const solar = new SolarCalc(new Date(), lat, long);
+    console.log(solar);
     
     return {
       statusCode: 200,
       body: JSON.stringify(
         {
           zipCode,
-          lat,
-          long
+          ...solar
         }
       )
     };

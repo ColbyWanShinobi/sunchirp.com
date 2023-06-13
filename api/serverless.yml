@@ -18,6 +18,13 @@ functions:
       - httpApi:
           path: /gps/{zipCode}
           method: get
+  getSunsetFromZip:
+    handler: src/handlers/getSunsetFromZip.handler
+    events:
+      - httpApi:
+          path: /sunset/{zipCode}
+          method: get
+
 
 custom:
   customDomain:
