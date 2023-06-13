@@ -12,11 +12,11 @@ provider:
   region: us-east-1
 
 functions:
-  hello:
-    handler: src/handlers/handler.hello
+  getGpsFromZip:
+    handler: src/handlers/getGpsFromZip.handler
     events:
       - httpApi:
-          path: /hello
+          path: /gps/{zipCode}
           method: get
 
 custom:

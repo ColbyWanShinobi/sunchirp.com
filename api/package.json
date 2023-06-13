@@ -1,5 +1,9 @@
 {
   "devDependencies": {
     "serverless-domain-manager": "^7.0.4"
+  },
+  "dependencies": {
+    "convert-zip-to-gps": "^1.2.0",
+    "lodash": "^4.17.21"
   }
 }
