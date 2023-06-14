@@ -10,6 +10,8 @@ provider:
   memorySize: 256
   stage: ${opt:stage, 'prod'}
   region: us-east-1
+  httpApi:
+    cors: true
 
 functions:
   getGpsFromZip:
@@ -24,7 +26,12 @@ functions:
       - httpApi:
           path: /sunset/{zipCode}
           method: get
-
+  getSunsetFromGPS:
+    handler: src/handlers/getSunsetFromGPS.handler
+    events:
+      - httpApi:
+          path: /sunset
+          method: post
 
 custom:
   customDomain:
