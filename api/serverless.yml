@@ -14,18 +14,18 @@ provider:
     cors: true
 
 functions:
-  getGpsFromZip:
-    handler: src/handlers/getGpsFromZip.handler
-    events:
-      - httpApi:
-          path: /gps/{zipCode}
-          method: get
-  getSunsetFromZip:
-    handler: src/handlers/getSunsetFromZip.handler
-    events:
-      - httpApi:
-          path: /sunset/{zipCode}
-          method: get
+  #getGpsFromZip:
+  #  handler: src/handlers/getGpsFromZip.handler
+  #  events:
+  #    - httpApi:
+  #        path: /gps/{zipCode}
+  #        method: get
+  #getSunsetFromZip:
+  #  handler: src/handlers/getSunsetFromZip.handler
+  #  events:
+  #    - httpApi:
+  #        path: /sunset/{zipCode}
+  #        method: get
   getSunsetFromGPS:
     handler: src/handlers/getSunsetFromGPS.handler
     events:

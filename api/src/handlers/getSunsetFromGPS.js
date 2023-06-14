@@ -10,6 +10,10 @@ module.exports.handler = async function getSunsetFromZip(event, context) {
     if (!latitude || !longitude ) {
       return {
         statusCode: 404,
+        headers: {
+          'Access-Control-Allow-Origin': '*',
+          'Access-Control-Allow-Credentials': true,
+        },
         body: JSON.stringify(
           {
             message: `Incomplete GPS Coordinates: ${latitude} - ${longitude}`,
@@ -24,6 +28,10 @@ module.exports.handler = async function getSunsetFromZip(event, context) {
     
     return {
       statusCode: 200,
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Credentials': true,
+      },
       body: JSON.stringify(
         {
           latitude,
@@ -37,6 +45,10 @@ module.exports.handler = async function getSunsetFromZip(event, context) {
     console.log(error);
     return {
       statusCode: 500,
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Credentials': true,
+      },
       body: JSON.stringify(
         {
           message: error.message || 'Multiversal Anomaly'

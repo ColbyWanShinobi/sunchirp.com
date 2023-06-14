@@ -41,11 +41,15 @@ function App() {
   const handleCalculateSunset = () => {
     if (latitude && longitude) {
       const sunsetAPIUrl = `https://api.sunchirp.com/v1/sunset/`;
+      const postBody = JSON.stringify({
+        latitude: latitude,
+        longitude: longitude
+      });
       fetch(sunsetAPIUrl, {
         method: 'post',
-        body: {
-          latitude,
-          longitude
+        body: postBody,
+        headers: {
+          'contentType': 'application/json'
         }
       })
         .then((response) => response.json())
