@@ -5,6 +5,7 @@ import Divider from '@mui/material/Divider';
 import { TextField } from '@mui/material';
 import NearMeIcon from '@mui/icons-material/NearMe';
 import Slider from '@mui/material/Slider';
+import { google, outlook, office365, yahoo, ics } from "calendar-link";
 
 import './App.css'
 
@@ -12,6 +13,7 @@ function App() {
   const [latitude, setLatitude] = useState('');
   const [longitude, setLongitude] = useState('');
   const [sunsetTime, setSunsetTime] = useState('');
+  const [duskTime, setDuskTime] = useState('');
 
   const handleLocationChange = (event) => {
     const { name, value } = event.target;
@@ -40,7 +42,8 @@ function App() {
 
   const handleCalculateSunset = () => {
     if (latitude && longitude) {
-      const sunsetAPIUrl = `https://api.sunchirp.com/v1/sunset/`;
+      const sunsetAPIUrl = `https://api.sunchirp.com/v1/sunset`;
+      //const sunsetAPIUrl = 'https://d8ey7ftc14.execute-api.us-east-1.amazonaws.com/sunset';
       const postBody = JSON.stringify({
         latitude: latitude,
         longitude: longitude
@@ -49,13 +52,15 @@ function App() {
         method: 'post',
         body: postBody,
         headers: {
-          'contentType': 'application/json'
+          'Content-Type': 'application/json'
         }
       })
         .then((response) => response.json())
         .then((data) => {
-          const sunsetTime = data.results.sunset;
-          setSunsetTime(sunsetTime);
+          //const sunsetTime = ;
+          //const duskTime = data.dusk;
+          setSunsetTime(data.sunset);
+          setDuskTime(data.dusk)
         })
         .catch((error) => {
           console.error('Error fetching sunset time:', error);
@@ -67,18 +72,24 @@ function App() {
 
   const handleDownloadICS = () => {
     // Create an .ics file with the sunset time and allow the user to download it
-    const filename = 'sunset_event.ics';
+    const filename = 'sunchirp.ics';
     const icsContent = `BEGIN:VCALENDAR
 VERSION:2.0
 BEGIN:VEVENT
 DTSTART:${sunsetTime}
 DTEND:${sunsetTime}
-SUMMARY:Sunset Event
+SUMMARY:SunChirp Sunset Event
 END:VEVENT
 END:VCALENDAR`;
-
+    const event = {
+      title: 'SunChirp Sunset Event',
+      description: 'blah blah',
+      start: sunsetTime,
+      end: duskTime
+    }
+    const newIcs = ics(event);
     const element = document.createElement('a');
-    element.href = 'data:text/plain;charset=utf-8,' + encodeURIComponent(icsContent);
+    element.href = newIcs;
     element.download = filename;
     element.click();
   };
@@ -90,6 +101,7 @@ END:VCALENDAR`;
       </head>
       <div>
         <h1>SunChirp</h1>
+        <p>Add the next sunset to your calendar</p>
         <img src={littleSun} className="logo-rot" alt="Vite logo" />
         <img src={littleBird} className="logo" alt="React logo" />
         <Divider variant="middle" color="white"/>
@@ -120,7 +132,7 @@ END:VCALENDAR`;
       {sunsetTime && (
         <div>
           <h2>Sunset Time: {sunsetTime}</h2>
-          <button onClick={handleDownloadICS}>Download .ics</button>
+          <button onClick={handleDownloadICS}>Download Calendar Event</button>
         </div>
       )}
     </div>
