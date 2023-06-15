@@ -7,7 +7,7 @@
     "dev": "vite",
     "build": "vite build",
     "provision": "sls deploy --verbose",
-    "deploy": "sls s3sync ",
+    "deploy": "sls s3sync",
     "lint": "eslint src --ext js,jsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview"
   },

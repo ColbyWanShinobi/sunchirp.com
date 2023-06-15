@@ -1,4 +1,7 @@
 {
+  "scripts": {
+    "deploy": "sls deploy --verbose"
+  },
   "devDependencies": {
     "serverless-domain-manager": "^7.0.4"
   },
