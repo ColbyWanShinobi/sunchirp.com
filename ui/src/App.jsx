@@ -134,9 +134,8 @@ function App() {
       <button onClick={handleCalculateSunset}>Calculate Sunset Time</button>
       {sunsetTime && duskTime && (
         <div>
-          <div className='heading'>Next Sunset Time:</div>
           <div className='sunset-date'>{displayDateTime(sunsetTime)}</div>
-          <div className='heading'>Add this sunset event to your calendar:</div>
+          <div className='heading'>Add sunset to calendar:</div>
           <button id='appleLink' className='calendar-button' onClick={handleCalendarURL}>Apple</button>
           <button id='googleLink' className='calendar-button' onClick={handleCalendarURL}>Google</button>
         </div>
