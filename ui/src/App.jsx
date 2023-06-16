@@ -14,6 +14,8 @@ function App() {
   const [longitude, setLongitude] = useState('');
   const [sunsetTime, setSunsetTime] = useState('');
   const [duskTime, setDuskTime] = useState('');
+  const [currentTimeZone, setCurrentTimeZone] = useState('');
+  const [inviteData, setInviteData] = useState('');
 
   const handleLocationChange = (event) => {
     const { name, value } = event.target;
@@ -30,20 +32,38 @@ function App() {
         (position) => {
           setLatitude(position.coords.latitude);
           setLongitude(position.coords.longitude);
+          setCurrentTimeZone(Intl.DateTimeFormat().resolvedOptions().timeZone)
         },
         (error) => {
           console.error('Error getting GPS coordinates:', error);
         }
       );
     } else {
-      console.error('Geolocation is not supported by this browser.');
+      console.error('Geolocation is not supported by this browser. Please enter your information manually');
     }
   };
+
+  const displayTime = (dateString) => {
+    const date = new Date(dateString);
+    return date.toLocaleTimeString([], { timeZone: currentTimeZone });
+  }
+
+  const displayDateTime = (dateString) => {
+    const date = new Date(dateString);
+    let options = {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      timeZone: currentTimeZone,
+      timeZoneName: 'short'
+    };
+    return new Intl.DateTimeFormat('en-US', options).format(date);
+  }  
 
   const handleCalculateSunset = () => {
     if (latitude && longitude) {
       const sunsetAPIUrl = `https://api.sunchirp.com/v1/sunset`;
-      //const sunsetAPIUrl = 'https://d8ey7ftc14.execute-api.us-east-1.amazonaws.com/sunset';
       const postBody = JSON.stringify({
         latitude: latitude,
         longitude: longitude
@@ -57,10 +77,14 @@ function App() {
       })
         .then((response) => response.json())
         .then((data) => {
-          //const sunsetTime = ;
-          //const duskTime = data.dusk;
           setSunsetTime(data.sunset);
-          setDuskTime(data.dusk)
+          setDuskTime(data.dusk);
+          setInviteData({
+            title: 'Sunset',
+            description: 'Brought to you by SunChirp.com (https://sunchirp.com)',
+            start: data.sunset,
+            end: data.dusk
+          });
         })
         .catch((error) => {
           console.error('Error fetching sunset time:', error);
@@ -70,35 +94,36 @@ function App() {
     }
   };
 
-  const handleDownloadICS = () => {
+  const handleDownloadICS = (calType) => {
     // Create an .ics file with the sunset time and allow the user to download it
     const filename = 'sunchirp.ics';
-    const icsContent = `BEGIN:VCALENDAR
-VERSION:2.0
-BEGIN:VEVENT
-DTSTART:${sunsetTime}
-DTEND:${sunsetTime}
-SUMMARY:SunChirp Sunset Event
-END:VEVENT
-END:VCALENDAR`;
-    const event = {
-      title: 'SunChirp Sunset Event',
-      description: 'blah blah',
-      start: sunsetTime,
-      end: duskTime
+    let invitation;
+    if (calType === 'Google') {
+      invitation = google(inviteData);
+    } else if (calType === 'Outlook') {
+      invitation = outlook(inviteData);
+    } else if (calType === 'Office365') {
+      invitation = office365(inviteData);
+    } else if (calType === 'Yahoo') {
+      invitation = yahoo(inviteData);
+    } else  {
+      //Default to iCal format/file
+      invitation = ics(inviteData);
     }
-    const newIcs = ics(event);
-    const element = document.createElement('a');
-    element.href = newIcs;
-    element.download = filename;
-    element.click();
+    const blob = new Blob([invitation], { type: 'text/calenda;charset=utf-8' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = filename;
+    link.click();
+    
+    //const element = document.createElement('a');
+    //element.href = invitation;
+    //element.download = filename;
+    //element.click();
   };
 
   return (
     <div>
-      <head>
-        <meta name="viewport" content="initial-scale=1, width=device-width" />
-      </head>
       <div>
         <h1>SunChirp</h1>
         <p>Add the next sunset to your calendar</p>
@@ -131,8 +156,9 @@ END:VCALENDAR`;
       <button onClick={handleCalculateSunset}>Calculate Sunset Time</button>
       {sunsetTime && (
         <div>
-          <h2>Sunset Time: {sunsetTime}</h2>
-          <button onClick={handleDownloadICS}>Download Calendar Event</button>
+          <h2>Next Sunset Time:</h2>
+          <h2>{displayDateTime(sunsetTime)}</h2>
+          <button onClick={handleDownloadICS}>Add to Apple Calendar</button>
         </div>
       )}
     </div>
