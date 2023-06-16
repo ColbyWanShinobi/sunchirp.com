@@ -5,24 +5,57 @@
   text-align: center;
 }
 
+.title {
+  font-size: 48px;
+  font-weight: 600;
+}
+
+.subtext {
+  margin-top: 0px;
+}
+
 .logo {
-  height: 6em;
-  padding: 1.5em;
+  height: 3em;
+  padding: 0.5em;
   will-change: filter;
   transition: filter 300ms;
 }
 
 .logo-rot {
-  height: 6em;
-  padding: 1.5em;
+  height: 3em;
+  padding: 0.5em;
   will-change: filter;
   transition: filter 300ms;
 }
 
-.logo:hover {
+button {
+  margin: 10px;
+}
+
+input
+{
+  font-size: 16px;
+  width: 100px;
+}
+
+label {
+  font-size: 24px;
+}
+
+.heading {
+  font-size: 24px;
+  font-weight: 400;
+}
+
+.sunset-date {
+  font-size: 24px;
+  font-weight: 900;
+}
+
+.logo-highlight:hover {
   filter: drop-shadow(0 0 2em #646cffaa);
 }
-.logo.react:hover {
+.logo-highlight.react:hover {
   filter: drop-shadow(0 0 2em #61dafbaa);
 }
 

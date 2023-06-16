@@ -1,10 +1,7 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import littleSun from './assets/images/sun.png';
 import littleBird from './assets/images/bird.png';
 import Divider from '@mui/material/Divider';
-import { TextField } from '@mui/material';
-import NearMeIcon from '@mui/icons-material/NearMe';
-import Slider from '@mui/material/Slider';
 import { google, outlook, office365, yahoo, ics } from "calendar-link";
 
 import './App.css'
@@ -24,7 +21,7 @@ function App() {
     } else if (name === 'longitude') {
       setLongitude(value);
     }
-  };
+  }
 
   const handleGetGPS = () => {
     if (navigator.geolocation) {
@@ -41,11 +38,6 @@ function App() {
     } else {
       console.error('Geolocation is not supported by this browser. Please enter your information manually');
     }
-  };
-
-  const displayTime = (dateString) => {
-    const date = new Date(dateString);
-    return date.toLocaleTimeString([], { timeZone: currentTimeZone });
   }
 
   const displayDateTime = (dateString) => {
@@ -55,11 +47,13 @@ function App() {
       year: 'numeric',
       month: 'long',
       day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
       timeZone: currentTimeZone,
       timeZoneName: 'short'
     };
     return new Intl.DateTimeFormat('en-US', options).format(date);
-  }  
+  }
 
   const handleCalculateSunset = () => {
     if (latitude && longitude) {
@@ -79,11 +73,18 @@ function App() {
         .then((data) => {
           setSunsetTime(data.sunset);
           setDuskTime(data.dusk);
-          setInviteData({
+          const event = {
             title: 'Sunset',
-            description: 'Brought to you by SunChirp.com (https://sunchirp.com)',
+            description: "Brought to you by SunChirp.com\n(https://sunchirp.com)",
             start: data.sunset,
             end: data.dusk
+          }
+          setInviteData({
+            appleLink: ics(event),
+            googleLink: google(event),
+            outlookLink: outlook(event),
+            office365Link: office365(event),
+            yahooLink: yahoo(event)
           });
         })
         .catch((error) => {
@@ -92,46 +93,23 @@ function App() {
     } else {
       console.error('Latitude and longitude are required.');
     }
-  };
+  }
 
-  const handleDownloadICS = (calType) => {
-    // Create an .ics file with the sunset time and allow the user to download it
-    const filename = 'sunchirp.ics';
-    let invitation;
-    if (calType === 'Google') {
-      invitation = google(inviteData);
-    } else if (calType === 'Outlook') {
-      invitation = outlook(inviteData);
-    } else if (calType === 'Office365') {
-      invitation = office365(inviteData);
-    } else if (calType === 'Yahoo') {
-      invitation = yahoo(inviteData);
-    } else  {
-      //Default to iCal format/file
-      invitation = ics(inviteData);
-    }
-    const blob = new Blob([invitation], { type: 'text/calenda;charset=utf-8' });
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(blob);
-    link.download = filename;
-    link.click();
-    
-    //const element = document.createElement('a');
-    //element.href = invitation;
-    //element.download = filename;
-    //element.click();
-  };
+  const handleCalendarURL = (event) => {
+    event.preventDefault();
+    window.location.href = inviteData[event.target.id];
+  }
 
   return (
     <div>
       <div>
-        <h1>SunChirp</h1>
-        <p>Add the next sunset to your calendar</p>
-        <img src={littleSun} className="logo-rot" alt="Vite logo" />
-        <img src={littleBird} className="logo" alt="React logo" />
+        <div className='title'>SunChirp</div>
+        <p className='subtext'>Add the next sunset to your calendar</p>
+        <img src={littleSun} className="logo logo-rot" alt="Sun" />
+        <img src={littleBird} className="logo" alt="Bird" />
         <Divider variant="middle" color="white"/>
       </div>
-      <button onClick={handleGetGPS}>Get GPS Coordinates</button>
+      <button onClick={handleGetGPS}>Get My GPS Coordinates</button>
       <br />
       <label>
         Latitude:
@@ -154,11 +132,13 @@ function App() {
       </label>
       <br />
       <button onClick={handleCalculateSunset}>Calculate Sunset Time</button>
-      {sunsetTime && (
+      {sunsetTime && duskTime && (
         <div>
-          <h2>Next Sunset Time:</h2>
-          <h2>{displayDateTime(sunsetTime)}</h2>
-          <button onClick={handleDownloadICS}>Add to Apple Calendar</button>
+          <div className='heading'>Next Sunset Time:</div>
+          <div className='sunset-date'>{displayDateTime(sunsetTime)}</div>
+          <div className='heading'>Add this sunset event to your calendar:</div>
+          <button id='appleLink' className='calendar-button' onClick={handleCalendarURL}>Apple</button>
+          <button id='googleLink' className='calendar-button' onClick={handleCalendarURL}>Google</button>
         </div>
       )}
     </div>
