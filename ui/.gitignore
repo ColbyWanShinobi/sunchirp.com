@@ -29,3 +29,5 @@ jspm_packages
 
 # Serverless directories
 .serverless
+
+ads.txt
